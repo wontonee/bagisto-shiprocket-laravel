@@ -11,6 +11,7 @@
                 <v-shiprocket-settings
                     :username="{{ json_encode(old('api_username', $apiUsername ?? '')) }}"
                     :password="{{ json_encode(old('api_password', $apiPassword ?? '')) }}"
+                    :domain="{{ json_encode(old('domain', $domain ?? '')) }}"
                     :license="{{ json_encode(old('license_key', $licenseKey ?? '')) }}"
                     :action="{{ json_encode(route('admin.shiprocket.settings.save')) }}"
                     :csrf-token="{{ json_encode(csrf_token()) }}"
@@ -56,6 +57,22 @@
                         >
                             <span v-text="passwordVisible ? 'Hide' : 'Show'"></span>
                         </button>
+                    </div>
+                </div>
+                
+                <div class="mb-8">
+                    <label for="domain" class="block mb-2 text-base font-medium text-gray-700">Domain</label>
+                    <input 
+                        type="text" 
+                        name="domain" 
+                        id="domain" 
+                        class="w-full border border-gray-300 rounded-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 transition" 
+                        v-model="formData.domain" 
+                        placeholder="example.com"
+                        required
+                    >
+                    <div class="mt-2 text-sm text-gray-500">
+                        Enter your domain without http/https (e.g., example.com, mystore.net)
                     </div>
                 </div>
                 
@@ -115,6 +132,10 @@
                         type: String,
                         default: ''
                     },
+                    domain: {
+                        type: String,
+                        default: ''
+                    },
                     license: {
                         type: String,
                         default: ''
@@ -135,6 +156,7 @@
                         formData: {
                             username: this.username,
                             password: this.password,
+                            domain: this.domain,
                             license: this.license
                         }
                     };
@@ -172,6 +194,12 @@
                             passwordField.name = 'api_password';
                             passwordField.value = '';
                             form.appendChild(passwordField);
+                            
+                            const domainField = document.createElement('input');
+                            domainField.type = 'hidden';
+                            domainField.name = 'domain';
+                            domainField.value = '';
+                            form.appendChild(domainField);
                             
                             const licenseField = document.createElement('input');
                             licenseField.type = 'hidden';

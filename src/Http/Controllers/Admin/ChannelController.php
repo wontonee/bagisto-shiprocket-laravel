@@ -51,8 +51,13 @@ class ChannelController extends Controller
             return redirect()->route('admin.shiprocket.settings');
         }
 
-        $client = new Client($this->apiUsername, $this->apiPassword);
-        $response = $client->channel->fetchChannels();
+        try {
+            $client = new Client($this->apiUsername, $this->apiPassword);
+            $response = $client->channel->fetchChannels();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Shiprocket API Error: ' . $e->getMessage());
+            return redirect()->route('admin.shiprocket.settings');
+        }
 
         $channels = [];
         

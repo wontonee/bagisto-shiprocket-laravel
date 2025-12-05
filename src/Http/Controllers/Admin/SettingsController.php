@@ -33,8 +33,9 @@ class SettingsController extends Controller
     {
         $apiUsername = optional(CoreConfig::where('code', 'shiprocket.api_username')->first())->value;
         $apiPassword = optional(CoreConfig::where('code', 'shiprocket.api_password')->first())->value;
+        $domain      = optional(CoreConfig::where('code', 'shiprocket.domain')->first())->value;
         $licenseKey  = optional(CoreConfig::where('code', 'shiprocket.license_key')->first())->value;
-        return view('shiprocket::admin.settings.index', compact('apiUsername', 'apiPassword', 'licenseKey'));
+        return view('shiprocket::admin.settings.index', compact('apiUsername', 'apiPassword', 'domain', 'licenseKey'));
     }
 
     /**
@@ -45,12 +46,14 @@ class SettingsController extends Controller
         // Check if this is a removal request (all fields empty)
         $isRemoval = empty($request->api_username) &&
             empty($request->api_password) &&
+            empty($request->domain) &&
             empty($request->license_key);
 
         if ($isRemoval) {
             // Delete existing settings
             CoreConfig::where('code', 'shiprocket.api_username')->delete();
             CoreConfig::where('code', 'shiprocket.api_password')->delete();
+            CoreConfig::where('code', 'shiprocket.domain')->delete();
             CoreConfig::where('code', 'shiprocket.license_key')->delete();
 
             return redirect()->back()->with('success', 'Shiprocket settings have been removed.');
@@ -60,12 +63,14 @@ class SettingsController extends Controller
         $request->validate([
             'api_username' => 'required|string',
             'api_password' => 'required|string',
+            'domain'       => 'required|string',
             'license_key'  => 'required|string',
         ]);
 
         // before saving, validate the license key
-        $response = Http::post('https://licenseapp.test/api/process-shiprocket-data', [
+        $response = Http::post('https://myapps.wontonee.com/api/process-shiprocket-data', [
             'license' => $request->license_key,
+            'domain' => $request->domain,
             'product_id' => "ShiprocketBagisto",
         ]);
 
@@ -87,6 +92,10 @@ class SettingsController extends Controller
         CoreConfig::updateOrCreate(
             ['code' => 'shiprocket.api_password'],
             ['value' => $request->api_password]
+        );
+        CoreConfig::updateOrCreate(
+            ['code' => 'shiprocket.domain'],
+            ['value' => $request->domain]
         );
         CoreConfig::updateOrCreate(
             ['code' => 'shiprocket.license_key'],
